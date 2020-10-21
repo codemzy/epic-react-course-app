@@ -42,7 +42,7 @@ function LoginForm({onSubmit, submitButton}) {
         <label htmlFor="password">Password</label>
         <Input id="password" type="password" />
       </FormGroup>
-      <div>{React.cloneElement(submitButton, {type: 'submit'})}</div>
+      <div>{React.cloneElement(submitButton, {type: 'submit'})} <Spinner /></div>
     </form>
   )
 }
@@ -83,7 +83,7 @@ function App() {
           <ModalContents aria-label="Login form" title="Login">
             <LoginForm
               onSubmit={login}
-              submitButton={<Button variant="primary">Login <Spinner /></Button>}
+              submitButton={<Button variant="primary">Login</Button>}
             />
           </ModalContents>
         </Modal>
