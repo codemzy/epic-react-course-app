@@ -30,16 +30,37 @@ import {Dialog as ReachDialog} from '@reach/dialog'
 //   background: '#f1f2f7',
 //   color: '#434449',
 
-const Button = styled.button(props => {
-  return {
+// my code but updated below after video
+// const Button = styled.button(props => {
+//   return {
+//     padding: '10px 15px',
+//     border: '0',
+//     lineHeight: '1',
+//     borderRadius: '3px',
+//     color: props.variant === "primary" ? 'white' : props.variant === "secondary" ? '#434449' : '',
+//     background: props.variant === "primary" ? '#3f51b5' : props.variant === "secondary" ? '#f1f2f7' : ''
+//   }
+// });
+
+const buttonVariants = {
+  primary: {
+    background: '#3f51b5',
+    color: 'white',
+  },
+  secondary: {
+    background: '#f1f2f7',
+    color: '#434449',
+  },
+};
+const Button = styled.button(
+  {
     padding: '10px 15px',
     border: '0',
     lineHeight: '1',
     borderRadius: '3px',
-    color: props.variant === "primary" ? 'white' : props.variant === "secondary" ? '#434449' : '',
-    background: props.variant === "primary" ? '#3f51b5' : props.variant === "secondary" ? '#f1f2f7' : ''
-  }
-});
+  },
+  ({variant = 'primary'}) => buttonVariants[variant], // defaults to primary if no variant passed
+);
 
 // Input
 //   borderRadius: '3px',
