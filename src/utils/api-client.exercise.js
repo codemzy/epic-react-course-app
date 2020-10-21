@@ -1,117 +1,19 @@
 function client(endpoint, customConfig = {}) {
-    // 🐨 create the config you'll pass to window.fetch
-    //    make the method default to "GET"
-    // 💰 if you're confused by this, that's fine. Scroll down to the bottom
-    // and I've got some code there you can copy/paste.
-    // 🐨 call window.fetch(fullURL, config) then handle the json response
-    // 📜 https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
-    // 💰 here's how to get the full URL: `${process.env.REACT_APP_API_URL}/${endpoint}`
-    const config = {
-        method: "GET",
-        ...customConfig
-    };
-
-    return window.fetch(`${process.env.REACT_APP_API_URL}/${endpoint}`, config)
-    .then(function(response) {
-        return response.json();
-    });
-};
-
-export {client}
-
-/*
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-💰 spoiler alert below...
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-const config = {
+  const config = {
     method: 'GET',
     ...customConfig,
   }
-*/
+
+  return window
+    .fetch(`${process.env.REACT_APP_API_URL}/${endpoint}`, config)
+    .then(async function(response) { // fetch will always respond even if error, will only error if server request fails
+        let data = await response.json(); // get data if successful or not
+        if (response.ok) { // if response is ok then no error from response
+            return data;
+        } else { // there was an error
+            return Promise.reject(data); // data is an error in this case
+        }
+    });
+}
+
+export {client}
