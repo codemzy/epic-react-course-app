@@ -1,39 +1,74 @@
+import '@reach/dialog/styles.css'
 import React from 'react'
 import ReactDOM from 'react-dom'
-// reach dialog
-import {Dialog} from "@reach/dialog";
-import '@reach/dialog/styles.css'
-// components
+import {Dialog} from '@reach/dialog'
 import {Logo} from './components/logo'
 
-function App() {
+function LoginForm(props) {
     // state
-    const [openModal, setOpenModal] = React.useState("none");
+    const [form, setForm] = React.useState({ username: "", password: "" });
 
-    // modal controls
-    const open = (type) => setOpenModal(type);
-    const close = () => setOpenModal("none");
+    function handleSubmit(event) {
+        event.preventDefault();
+        props.onSubmit(form);
+    };
+
+    function handleChange(event) {
+        setForm({...form, [event.target.name]: event.target.value });
+    };
 
     return (
-        <div>
-            <Logo width="80" height="80" />
-            <h1>Bookshelf</h1>
+        <form onSubmit={handleSubmit}>
             <div>
-                <button onClick={() => open('login')}>Login</button>
+                <label htmlFor="login-username">Username</label>
+                <input id="login-username" type="text" name="username" value={form.username} onChange={handleChange} />
             </div>
             <div>
-                <button onClick={() => open('register')}>Register</button>
+                <label htmlFor="login-password">Password</label>
+                <input id="login-password" type="password" name="password" value={form.password} onChange={handleChange} />
             </div>
-            <Dialog aria-label="Login form" isOpen={openModal === "login"} onDismiss={close}>
-                <p>This is the log in modal</p>
-                <button onClick={close}>Okay</button>
-            </Dialog>
-            <Dialog aria-label="Registration form" isOpen={openModal === "register"} onDismiss={close}>
-                <p>This is the register modal</p>
-                <button onClick={close}>Okay</button>
-            </Dialog>
-        </div>
+            <button>{props.buttonText}</button>
+        </form>
     )
+};
+
+function App() {
+    const [openModal, setOpenModal] = React.useState('none')
+
+    function handleLogin(formData) {
+        console.log('login', formData)
+    };
+
+    function handleRegister(formData) {
+        console.log('register', formData)
+    };
+
+  return (
+    <div>
+      <Logo width="80" height="80" />
+      <h1>Bookshelf</h1>
+      <div>
+        <button onClick={() => setOpenModal('login')}>Login</button>
+      </div>
+      <div>
+        <button onClick={() => setOpenModal('register')}>Register</button>
+      </div>
+      <Dialog aria-label="Login form" isOpen={openModal === 'login'}>
+        <div>
+          <button onClick={() => setOpenModal('none')}>Close</button>
+        </div>
+        <h3>Login</h3>
+        <LoginForm onSubmit={handleLogin} buttonText="Login" />
+      </Dialog>
+      <Dialog aria-label="Registration form" isOpen={openModal === 'register'}>
+        <div>
+          <button onClick={() => setOpenModal('none')}>Close</button>
+        </div>
+        <h3>Register</h3>
+        <LoginForm onSubmit={handleRegister} buttonText="Register" />
+      </Dialog>
+    </div>
+  )
 }
 
 ReactDOM.render(<App />, document.getElementById('root'))
