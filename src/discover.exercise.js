@@ -1,6 +1,5 @@
 /** @jsx jsx */
 import {jsx} from '@emotion/core'
-import * as colors from './styles/colors'
 
 import React from 'react'
 import Tooltip from '@reach/tooltip'
@@ -8,31 +7,20 @@ import {FaSearch, FaTimes} from 'react-icons/fa'
 import {Input, BookListUL, Spinner} from './components/lib'
 import {BookRow} from './components/book-row'
 import {client} from './utils/api-client'
+import {useAsync} from 'utils/hooks' // extra 2
+import * as colors from './styles/colors'
 
 function DiscoverBooksScreen() {
-  const [status, setStatus] = React.useState('idle')
-  const [data, setData] = React.useState(null)
-  const [query, setQuery] = React.useState('')
+  const {data, error, run, isLoading, isError, isSuccess} = useAsync(); // extra 2 - use this custom hook to handle async data
+  const [query, setQuery] = React.useState()
   const [queried, setQueried] = React.useState(false)
-  const [error, setError] = React.useState(null);
-
-  const isLoading = status === 'loading'
-  const isSuccess = status === 'success'
-  const isError = status === 'error'
 
   React.useEffect(() => {
     if (!queried) {
       return
     }
-    setStatus('loading')
-    client(`books?query=${encodeURIComponent(query)}`).then(responseData => {
-      setData(responseData)
-      setStatus('success')
-    }).catch(function(error) {
-        setError(error);
-        setStatus('error');
-    });
-  }, [query, queried])
+    run(client(`books?query=${encodeURIComponent(query)}`));
+  }, [query, queried, run])
 
   function handleSearchSubmit(event) {
     event.preventDefault()
@@ -61,22 +49,24 @@ function DiscoverBooksScreen() {
                 background: 'transparent',
               }}
             >
-              {isLoading ? <Spinner /> 
-              : isError ? <FaTimes aria-label="error" css={{color: colors.danger}} />
-              : <FaSearch aria-label="search" />}
+              {isLoading ? (
+                <Spinner />
+              ) : isError ? (
+                <FaTimes aria-label="error" css={{color: colors.danger}} />
+              ) : (
+                <FaSearch aria-label="search" />
+              )}
             </button>
           </label>
         </Tooltip>
       </form>
 
-    {
-        isError ? (
-            <div css={{color: colors.danger}}>
-            <p>There was an error:</p>
-            <pre>{error.message}</pre>
-            </div>
-        ) : null
-    }
+      {isError ? (
+        <div css={{color: colors.danger}}>
+          <p>There was an error:</p>
+          <pre>{error.message}</pre>
+        </div>
+      ) : null}
 
       {isSuccess ? (
         data?.books?.length ? (

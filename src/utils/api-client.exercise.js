@@ -6,14 +6,14 @@ function client(endpoint, customConfig = {}) {
 
   return window
     .fetch(`${process.env.REACT_APP_API_URL}/${endpoint}`, config)
-    .then(async function(response) { // fetch will always respond even if error, will only error if server request fails
-        let data = await response.json(); // get data if successful or not
-        if (response.ok) { // if response is ok then no error from response
-            return data;
-        } else { // there was an error
-            return Promise.reject(data); // data is an error in this case
-        }
-    });
+    .then(async response => {
+      const data = await response.json()
+      if (response.ok) {
+        return data
+      } else {
+        return Promise.reject(data)
+      }
+    })
 }
 
 export {client}
