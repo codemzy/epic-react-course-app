@@ -1,3 +1,4 @@
+import * as auth from '../auth-provider';
 const apiURL = process.env.REACT_APP_API_URL
 
 function client(
@@ -17,7 +18,12 @@ function client(
     if (response.ok) {
       return data
     } else {
-      return Promise.reject(data)
+        if (response.status === 401) {
+            auth.logout(); // logout the user
+            window.location.assign(window.location); // refresh page
+            return Promise.reject('Please re-authenticate');
+        }
+        return Promise.reject(data)
     }
   })
 }

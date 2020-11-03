@@ -3,59 +3,75 @@ import {jsx} from '@emotion/core'
 
 import React from 'react'
 import * as auth from 'auth-provider'
+import {FullPageSpinner} from './components/lib'
+import * as colors from './styles/colors'
 import {client} from './utils/api-client'
-import {useAsync} from './utils/hooks';
+import {useAsync} from './utils/hooks'
 import {AuthenticatedApp} from './authenticated-app'
 import {UnauthenticatedApp} from './unauthenticated-app'
-import {FullPageSpinner} from 'components/lib';
-import * as colors from 'styles/colors';
 
 async function getUser() {
+  let user = null
+
   const token = await auth.getToken()
   if (token) {
-    return await client('me', {token}).then(function(response) {
-        return response.user;
-    })
+    const data = await client('me', {token})
+    user = data.user
   }
+
+  return user
 }
 
 function App() {
-    const {data: user, setData, error, isIdle, isLoading, isSuccess, isError, run} = useAsync();
+  const {
+    data: user,
+    error,
+    isLoading,
+    isIdle,
+    isError,
+    isSuccess,
+    run,
+    setData,
+  } = useAsync()
 
   React.useEffect(() => {
-    run(getUser());
+    run(getUser())
   }, [run])
 
-  const login = form => run(auth.login(form));
-  const register = form => run(auth.register(form));
+  const login = form => auth.login(form).then(user => setData(user))
+  const register = form => auth.register(form).then(user => setData(user))
   const logout = () => {
     auth.logout()
     setData(null)
   }
 
   if (isLoading || isIdle) {
-      return <FullPageSpinner />
-  } else if (isError) {
+    return <FullPageSpinner />
+  }
+
+  if (isError) {
     return (
-        <div
-            css={{
-                color: colors.danger,
-                height: '100vh',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'center',
-            }}
-        >
-            <p>Uh oh... There's a problem. Try refreshing the app.</p>
-            <pre>{error.message}</pre>
-        </div>
-    );
-  } else if (isSuccess) {
+      <div
+        css={{
+          color: colors.danger,
+          height: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <p>Uh oh... There's a problem. Try refreshing the app.</p>
+        <pre>{error.message}</pre>
+      </div>
+    )
+  }
+
+  if (isSuccess) {
     return user ? (
-        <AuthenticatedApp user={user} logout={logout} />
+      <AuthenticatedApp user={user} logout={logout} />
     ) : (
-        <UnauthenticatedApp login={login} register={register} />
+      <UnauthenticatedApp login={login} register={register} />
     )
   }
 }
