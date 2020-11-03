@@ -2,43 +2,43 @@
 import {jsx} from '@emotion/core'
 
 import React from 'react'
-// 🐨 you're going to need this:
 import * as auth from 'auth-provider'
+import {client} from './utils/api-client'
 import {AuthenticatedApp} from './authenticated-app'
 import {UnauthenticatedApp} from './unauthenticated-app'
 
+async function checkUser() {
+    const token = await auth.getToken();
+    if (token) {
+        // we're logged in! Let's go get the user's data:
+        return await client('me', {"Authorization": `Bearer ${token}`}).then(data => {
+            return data.user;
+        });
+    }
+};
+
 function App() {
-  // 🐨 useState for the user
-  const [ user, setUser ] = React.useState(null);
+  const [user, setUser] = React.useState(null)
 
-  // 🐨 create a login function that calls auth.login then sets the user
-  // 💰 const login = form => auth.login(form).then(u => setUser(u))
-  function login(form) {
-      return auth.login(form).then(function(u) {
+  // extra 1 - check if user on page load
+  React.useEffect(() => {
+    checkUser().then(function(u) {
         setUser(u);
-      });
-  };
-  // 🐨 create a registration function that does the same as login except for register
-  function register(form) {
-      return auth.register(form).then(function(u) {
-        setUser(u);
-      });
-  };
-  // 🐨 create a logout function that calls auth.logout() and sets the user to null
-  function logout(form) {
-      return auth.logout().then(function() {
-        setUser(null);
-      });
-  };
-  // 🐨 if there's a user, then render then AuthenitcatedApp with the user and logout
-  // 🐨 if there's not a user, then render the UnauthenticatedApp with login and register
+    });
+  }, []);
 
-  return user ? <AuthenticatedApp user={user} logout={logout} /> : <UnauthenticatedApp login={login} register={register} />;
+  const login = form => auth.login(form).then(u => setUser(u))
+  const register = form => auth.register(form).then(u => setUser(u))
+  const logout = () => {
+    auth.logout()
+    setUser(null)
+  }
+
+  return user ? (
+    <AuthenticatedApp user={user} logout={logout} />
+  ) : (
+    <UnauthenticatedApp login={login} register={register} />
+  )
 }
 
 export {App}
-
-/*
-eslint
-  no-unused-vars: "off",
-*/
