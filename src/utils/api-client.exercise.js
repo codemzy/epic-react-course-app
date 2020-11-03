@@ -1,29 +1,33 @@
-import * as auth from '../auth-provider';
+import * as auth from 'auth-provider'
 const apiURL = process.env.REACT_APP_API_URL
 
 function client(
   endpoint,
-  {token, headers: customHeaders, ...customConfig} = {},
+  {token, data, headers: customHeaders, ...customConfig} = {},
 ) {
   const config = {
+    method: data ? 'POST' : 'GET',
     headers: {
       Authorization: token ? `Bearer ${token}` : undefined,
+      'Content-Type': data ? 'application/json' : undefined,
       ...customHeaders,
     },
+    body: data ? JSON.stringify(data) : undefined,
     ...customConfig,
   }
 
   return window.fetch(`${apiURL}/${endpoint}`, config).then(async response => {
+    if (response.status === 401) {
+      await auth.logout()
+      // refresh the page for them
+      window.location.assign(window.location)
+      return Promise.reject({message: 'Please re-authenticate.'})
+    }
     const data = await response.json()
     if (response.ok) {
       return data
     } else {
-        if (response.status === 401) {
-            auth.logout(); // logout the user
-            window.location.assign(window.location); // refresh page
-            return Promise.reject('Please re-authenticate');
-        }
-        return Promise.reject(data)
+      return Promise.reject(data)
     }
   })
 }
