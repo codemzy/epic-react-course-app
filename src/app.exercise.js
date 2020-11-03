@@ -11,7 +11,7 @@ async function checkUser() {
     const token = await auth.getToken();
     if (token) {
         // we're logged in! Let's go get the user's data:
-        return await client('me', {"Authorization": `Bearer ${token}`}).then(data => {
+        return await client('me', {token}).then(data => {
             return data.user;
         });
     }
