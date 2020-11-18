@@ -8,7 +8,13 @@ import {ReactQueryConfigProvider} from 'react-query';
 const queryConfig = {
     queries: {
         refetchOnWindowFocus: false,
-        useErrorBoundary: true
+        useErrorBoundary: true,
+        retry: function(failureCount, error) {
+            if (error.status === 404) {
+                return false; // don't retry
+            }
+            return failureCount < 2 ? true : false;
+        }
     },
 };
 
