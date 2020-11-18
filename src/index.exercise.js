@@ -2,27 +2,26 @@ import {loadDevTools} from './dev-tools/load'
 import './bootstrap'
 import React from 'react'
 import ReactDOM from 'react-dom'
+import {ReactQueryConfigProvider} from 'react-query'
 import {App} from './app'
-import {ReactQueryConfigProvider} from 'react-query';
 
 const queryConfig = {
-    queries: {
-        refetchOnWindowFocus: false,
-        useErrorBoundary: true,
-        retry: function(failureCount, error) {
-            if (error.status === 404) {
-                return false; // don't retry
-            }
-            return failureCount < 2 ? true : false;
-        }
+  queries: {
+    useErrorBoundary: true,
+    refetchOnWindowFocus: false,
+    retry(failureCount, error) {
+      if (error.status === 404) return false
+      else if (failureCount < 2) return true
+      else return false
     },
-};
+  },
+}
 
 loadDevTools(() => {
-    ReactDOM.render(
-        <ReactQueryConfigProvider config={queryConfig}>
-            <App />
-        </ReactQueryConfigProvider>,
-        document.getElementById('root'),
-    );
-});
+  ReactDOM.render(
+    <ReactQueryConfigProvider config={queryConfig}>
+      <App />
+    </ReactQueryConfigProvider>,
+    document.getElementById('root'),
+  )
+})
