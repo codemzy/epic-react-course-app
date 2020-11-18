@@ -35,10 +35,12 @@ function BookScreen({user}) {
   // 🐨 call useQuery here
   // queryKey should be ['book', {bookId}]
   // queryFn should be what's currently passed in the run function below
-  const { data } = useQuery({
+  const { data: book = loadingBook } = useQuery({ // data is book or default to loading book
     queryKey: ['book', {bookId}],
     queryFn: () =>
-      client(`books/${bookId}`, {token: user.token})
+      client(`books/${bookId}`, {token: user.token}).then(function(data) {
+          return data.book;
+      })
   });
 
 //   // 💣 remove the useEffect here (react-query will handle that now)
@@ -60,7 +62,6 @@ function BookScreen({user}) {
   // cache. This works out because we're using react-query for caching!
   const listItem = listItems?.find(li => li.bookId === bookId) ?? null
 
-  const book = data?.book ?? loadingBook
   const {title, author, coverImageUrl, publisher, synopsis} = book
 
   return (
