@@ -19,7 +19,7 @@ import {StatusButtons} from 'components/status-buttons'
 
 function BookScreen({user}) {
   const {bookId} = useParams()
-  const {book} = useBook(bookId, user);
+  const book = useBook(bookId, user);
 
   const {data: listItems} = useQuery({
     queryKey: 'list-items',
