@@ -7,12 +7,12 @@ function useListItems(user) {
         queryFn: () =>
         client(`list-items`, {token: user.token}).then(data => data.listItems),
     });
-    return data;
+    return data || [];
 };
 
 function useListItem(user, bookId) {
     const listItems = useListItems(user);
-    return listItems?.find(li => li.bookId === bookId) ?? null
+    return listItems.find(li => li.bookId === bookId) ?? null
 };
 
 export {useListItems, useListItem};
