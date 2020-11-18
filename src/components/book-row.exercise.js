@@ -9,8 +9,9 @@ import {StatusButtons} from './status-buttons'
 import {Rating} from './rating'
 
 function BookRow({user, book}) {
-  const {title, author, coverImageUrl} = book;
-  const listItem = useListItem(user, book.id);
+  const {title, author, coverImageUrl} = book
+
+  const listItem = useListItem(user, book.id)
 
   const id = `book-row-book-${book.id}`
 
