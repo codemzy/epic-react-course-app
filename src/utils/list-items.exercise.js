@@ -15,9 +15,6 @@ function useListItem(user, bookId) {
     return listItems.find(li => li.bookId === bookId) ?? null
 };
 
-// - `useRemoveListItem(user)`
-// - `useCreateListItem(user)`
-
 function useUpdateListItem(user) {
     const [update] = useMutation(
         updates =>
