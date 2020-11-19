@@ -16,20 +16,25 @@ const loadingBooks = Array.from({length: 10}, (v, index) => ({
   ...loadingBook,
 }))
 
-const getBookSearchConfig = function(query, user) {
-    return {
-        queryKey: ['bookSearch', {query}],
-        queryFn: () =>
-        client(`books?query=${encodeURIComponent(query)}`, {
-            token: user.token,
-        }).then(data => data.books),
-    }
-};
+const getBookSearchConfig = (query, user) => ({
+  queryKey: ['bookSearch', {query}],
+  queryFn: () =>
+    client(`books?query=${encodeURIComponent(query)}`, {
+      token: user.token,
+    }).then(data => data.books),
+  config: {
+      onSuccess: function(data) {
+          data.map(function(book) {
+            return setQueryDataForBook(book);
+          })
+      }
+  }
+})
 
 function useBookSearch(query, user) {
-  const result = useQuery(getBookSearchConfig(query, user));
+  const result = useQuery(getBookSearchConfig(query, user))
   return {...result, books: result.data ?? loadingBooks}
-};
+}
 
 function useBook(bookId, user) {
   const {data} = useQuery({
@@ -41,8 +46,12 @@ function useBook(bookId, user) {
 }
 
 async function refetchBookSearchQuery(user) {
-    queryCache.removeQueries('bookSearch');
-    await queryCache.prefetchQuery(getBookSearchConfig('', user));
+  queryCache.removeQueries('bookSearch')
+  await queryCache.prefetchQuery(getBookSearchConfig('', user))
+}
+
+function setQueryDataForBook(book) {
+    queryCache.setQueryData(['book', {bookId: book.id}], book);
 };
 
-export {useBook, useBookSearch, refetchBookSearchQuery}
+export {useBook, useBookSearch, refetchBookSearchQuery, setQueryDataForBook}
