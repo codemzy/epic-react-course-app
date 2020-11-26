@@ -7,6 +7,7 @@ import {FullPageSpinner} from '../components/lib';
 import * as colors from '../styles/colors'
 
 const AuthContext = React.createContext()
+AuthContext.displayName = "AuthContext";
 
 function useAuth() {
   const context = React.useContext(AuthContext)
