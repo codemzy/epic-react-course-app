@@ -2,12 +2,10 @@
 import {jsx} from '@emotion/core'
 
 import React from 'react'
-import {Dialog} from './lib'
+import VisuallyHidden from '@reach/visually-hidden'
+import {Dialog, CircleButton} from './lib'
 
-// could also use this snazzy function for call all instead of manually calling onClick
-// const callAll = (...fns) => (...args) => fns.forEach(fn => fn && fn(...args))
-// and in clone element do
-// onClick: callAll(() => setIsOpen(false), child.props.onClick)
+const callAll = (...fns) => (...args) => fns.forEach(fn => fn && fn(...args))
 
 const ModalContext = React.createContext()
 
@@ -20,28 +18,42 @@ function Modal(props) {
 function ModalDismissButton({children: child}) {
   const [, setIsOpen] = React.useContext(ModalContext)
   return React.cloneElement(child, {
-    onClick: (...args) => { // this overrided any existing onClick prop of the child
-        child.props.onClick && child.props.onClick(...args); // so re add and call an onClick function if it has been passed
-        setIsOpen(false); // also close the modal
-    },
+    onClick: callAll(() => setIsOpen(false), child.props.onClick),
   })
 }
 
 function ModalOpenButton({children: child}) {
   const [, setIsOpen] = React.useContext(ModalContext)
   return React.cloneElement(child, {
-    onClick: (...args) => {
-        child.props.onClick && child.props.onClick(...args); // call an onClick function if it has been passed
-        setIsOpen(true); //also open the modal
-    },
+    onClick: callAll(() => setIsOpen(true), child.props.onClick),
   })
 }
 
-function ModalContents(props) {
+function ModalContentsBase(props) {
   const [isOpen, setIsOpen] = React.useContext(ModalContext)
   return (
     <Dialog isOpen={isOpen} onDismiss={() => setIsOpen(false)} {...props} />
   )
 }
+
+function ModalContents({children, title, ...props}) {
+    const circleDismissButton = (
+        <div css={{display: 'flex', justifyContent: 'flex-end'}}>
+            <ModalDismissButton>
+            <CircleButton>
+                <VisuallyHidden>Close</VisuallyHidden>
+                <span aria-hidden>×</span>
+            </CircleButton>
+            </ModalDismissButton>
+        </div>
+    )
+    return (
+        <ModalContentsBase {...props}>
+            {circleDismissButton}
+            <h3 css={{textAlign: 'center', fontSize: '2em'}}>{title}</h3>
+            {children}
+        </ModalContentsBase>
+    )
+};
 
 export {Modal, ModalDismissButton, ModalOpenButton, ModalContents}
