@@ -20,9 +20,9 @@ function Modal(props) {
 function ModalDismissButton({children: child}) {
   const [, setIsOpen] = React.useContext(ModalContext)
   return React.cloneElement(child, {
-    onClick: () => {
-        child.props.onClick && child.props.onClick(); // call an onClick function if it has been passed
-        setIsOpen(false); //also close the modal
+    onClick: (...args) => { // this overrided any existing onClick prop of the child
+        child.props.onClick && child.props.onClick(...args); // so re add and call an onClick function if it has been passed
+        setIsOpen(false); // also close the modal
     },
   })
 }
@@ -30,8 +30,8 @@ function ModalDismissButton({children: child}) {
 function ModalOpenButton({children: child}) {
   const [, setIsOpen] = React.useContext(ModalContext)
   return React.cloneElement(child, {
-    onClick: () => {
-        child.props.onClick && child.props.onClick(); // call an onClick function if it has been passed
+    onClick: (...args) => {
+        child.props.onClick && child.props.onClick(...args); // call an onClick function if it has been passed
         setIsOpen(true); //also open the modal
     },
   })
