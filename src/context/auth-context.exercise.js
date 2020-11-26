@@ -1,8 +1,13 @@
-// 🐨 create and export a React context variable for the AuthContext
-// 💰 using React.createContext
-
 import React from 'react'
 
-const AuthContext = React.createContext();
+const AuthContext = React.createContext({});
 
-export { AuthContext };
+const useAuth = function() {
+    const context = React.useContext(AuthContext);
+    if (!context) {
+        throw new Error("You need to 'useAuth' inside the AuthContext provider!");
+    }
+    return context;
+};
+
+export {AuthContext, useAuth}
