@@ -42,16 +42,16 @@ function Modal(props) {
 // 📜 https://reactjs.org/docs/react-api.html#cloneelement
 // 💰 to get the setIsOpen function you'll need, you'll have to useContext!
 // 💰 keep in mind that the children prop will be a single child (the user's button)
-function ModalDismissButton({children}) {
+function ModalDismissButton({children:child}) { // aliased children to child as only takes one child
     const {setIsOpen} = React.useContext(ModalContext);
-    return React.cloneElement(children,{onClick: () => setIsOpen(false) }); // add on click handler to the button
+    return React.cloneElement(child,{onClick: () => setIsOpen(false) }); // add on click handler to the button
 };
 
 // 🐨 create a ModalOpenButton component which is effectively the same thing as
 // ModalDismissButton except the onClick sets isOpen to true
-function ModalOpenButton({children}) {
+function ModalOpenButton({children:child}) { // aliased children to child as only takes one child
     const {setIsOpen} = React.useContext(ModalContext);
-    return React.cloneElement(children,{onClick: () => setIsOpen(true) }); // add on click handler to the button
+    return React.cloneElement(child,{onClick: () => setIsOpen(true) }); // add on click handler to the button
 };
 
 // 🐨 create a ModalContent component which renders the Dialog.
