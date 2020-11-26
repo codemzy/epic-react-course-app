@@ -34,13 +34,13 @@ const getBookSearchConfig = (query, user) => ({
 })
 
 function useBookSearch(query) {
-  const {user} = useAuth();
+  const {user} = useAuth()
   const result = useQuery(getBookSearchConfig(query, user))
   return {...result, books: result.data ?? loadingBooks}
 }
 
 function useBook(bookId) {
-  const {user} = useAuth();
+  const {user} = useAuth()
   const {data} = useQuery({
     queryKey: ['book', {bookId}],
     queryFn: () =>
@@ -50,7 +50,7 @@ function useBook(bookId) {
 }
 
 function useRefetchBookSearchQuery() {
-  const {user} = useAuth();
+  const {user} = useAuth()
   return React.useCallback(
     async function refetchBookSearchQuery() {
       queryCache.removeQueries('bookSearch')
