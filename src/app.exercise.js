@@ -1,23 +1,11 @@
-/** @jsx jsx */
-import {jsx} from '@emotion/core'
-
-
-import {BrowserRouter as Router} from 'react-router-dom'
+import React from 'react'
 import {useAuth} from './context/auth-context'
 import {AuthenticatedApp} from './authenticated-app'
 import {UnauthenticatedApp} from './unauthenticated-app'
 
 function App() {
-    const {user} = useAuth();
-    return (
-        user ? (
-          <Router>
-            <AuthenticatedApp />
-          </Router>
-        ) : (
-          <UnauthenticatedApp />
-        )
-    )
+  const {user} = useAuth()
+  return user ? <AuthenticatedApp /> : <UnauthenticatedApp />
 }
 
 export {App}
