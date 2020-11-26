@@ -53,7 +53,7 @@ function useRefetchBookSearchQuery() {
       queryCache.removeQueries('bookSearch')
       await queryCache.prefetchQuery(getBookSearchConfig('', client))
     },
-    [client],
+    [client], // used in dependency list - but thats ok because its memoized
   )
 }
 

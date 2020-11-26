@@ -74,7 +74,7 @@ function useAuth() {
 
 function useClient() {
     const {user: {token}} = useAuth();
-    return React.useCallback(function authenticatedClient(endpoint, config) {
+    return React.useCallback(function authenticatedClient(endpoint, config) { // momoized incase it needs to be used in a dependency list somewhere
         return client(endpoint, {...config, token});
     }, [token]);
 };
