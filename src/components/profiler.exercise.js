@@ -1,10 +1,9 @@
-// this is for extra credit
 import React from 'react'
 import {client} from 'utils/api-client'
 
 let queue = []
 
-setInterval(sendProfileQueue, 5000); // sends the queue to back end at most every 5 seconds
+setInterval(sendProfileQueue, 5000)
 
 function sendProfileQueue() {
   if (!queue.length) {
@@ -28,7 +27,7 @@ function Profiler({metadata, phases, ...props}) {
     commitTime, // when React committed this update
     interactions, // the Set of interactions belonging to this update
   ) {
-    if (!phases || phases.includes(phase)) { // only if its a phase we are interested in "mount" or "update"
+    if (!phases || phases.includes(phase)) {
       queue.push({
         metadata,
         id,
@@ -37,11 +36,12 @@ function Profiler({metadata, phases, ...props}) {
         baseDuration,
         startTime,
         commitTime,
-        interactions,
+        interactions: [...interactions], //convert from set to array
       })
     }
   }
   return <React.Profiler onRender={reportProfile} {...props} />
 }
 
-export {Profiler};
+export {Profiler}
+export {unstable_trace as trace, unstable_wrap as wrap} from 'scheduler/tracing'; // for extra 4

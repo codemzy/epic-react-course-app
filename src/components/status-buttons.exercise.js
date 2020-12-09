@@ -1,5 +1,6 @@
 /** @jsx jsx */
 import {jsx} from '@emotion/core'
+import {trace} from './profiler'; // extra 4
 
 import React from 'react'
 import {
@@ -27,7 +28,9 @@ function TooltipButton({label, highlight, onClick, icon, ...rest}) {
     if (isError) {
       reset()
     } else {
-      run(onClick())
+        trace(`Click ${label}`, performance.now(), () => { // extra 4
+            run(onClick())
+        });
     }
   }
 
@@ -76,7 +79,7 @@ function StatusButtons({book}) {
           <TooltipButton
             label="Mark as read"
             highlight={colors.green}
-            onClick={() => mutate({id: listItem.id, finishDate: Date.now()})}
+            onClick={() => mutate({id: listItem.id, finishDate: Date.now()}) }
             icon={<FaCheckCircle />}
           />
         )

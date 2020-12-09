@@ -4,7 +4,7 @@ import {jsx} from '@emotion/core'
 import {useListItems} from 'utils/list-items'
 import {BookListUL} from './lib'
 import {BookRow} from './book-row'
-import {Profiler} from './profiler';
+import {Profiler} from './profiler'
 
 function ListItemList({filterListItems, noListItems, noFilteredListItems}) {
   const listItems = useListItems()
@@ -23,14 +23,17 @@ function ListItemList({filterListItems, noListItems, noFilteredListItems}) {
   }
 
   return (
-    <Profiler id="List Item List" metadata={{ listItemCount: filteredListItems.length}}>
-    <BookListUL>
-      {filteredListItems.map(listItem => (
-        <li key={listItem.id} aria-label={listItem.book.title}>
-          <BookRow book={listItem.book} />
-        </li>
-      ))}
-    </BookListUL>
+    <Profiler
+      id="List Item List"
+      metadata={{listItemCount: filteredListItems.length}}
+    >
+      <BookListUL>
+        {filteredListItems.map(listItem => (
+          <li key={listItem.id} aria-label={listItem.book.title}>
+            <BookRow book={listItem.book} />
+          </li>
+        ))}
+      </BookListUL>
     </Profiler>
   )
 }
