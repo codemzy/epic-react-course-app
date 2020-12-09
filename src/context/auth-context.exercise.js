@@ -39,12 +39,25 @@ function AuthProvider(props) {
     run(getUser())
   }, [run])
 
-  const login = form => auth.login(form).then(user => setData(user))
-  const register = form => auth.register(form).then(user => setData(user))
-  const logout = () => {
+  // wrap in useCallback for performance so that they dont 
+  // get recreated on each render and trigger the values to change
+  const login = React.useCallback((form) => {
+    return auth.login(form).then(user => setData(user))
+  }, [setData]);
+
+  const register = React.useCallback((form) => {
+    return auth.register(form).then(user => setData(user))
+  }, [setData]);
+
+  const logout = React.useCallback(() => {
     auth.logout()
     setData(null)
-  }
+  }, [setData]);
+
+  // wrap in useMemo so value only changes if dependencies change
+  const value = React.useMemo(() => {
+      return {user, login, register, logout};
+  }, [user, login, register, logout])
 
   if (isLoading || isIdle) {
     return <FullPageSpinner />
@@ -55,7 +68,6 @@ function AuthProvider(props) {
   }
 
   if (isSuccess) {
-    const value = {user, login, register, logout}
     return <AuthContext.Provider value={value} {...props} />
   }
 
