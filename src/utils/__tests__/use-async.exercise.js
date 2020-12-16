@@ -105,8 +105,24 @@ test('calling run with a promise which rejects', async() => {
     expect(result.current.status).toBe("idle");
 });
 
-test.todo('can specify an initial state')
-// 💰 useAsync(customInitialState)
+test('can specify an initial state', function() {
+    // 💰 useAsync(customInitialState)
+    const customInitialState = { test: true, value: "testing" };
+    const { result } = renderHook(() => useAsync({ data: customInitialState }));
+    expect(result.current).toEqual({
+      isIdle: true,
+      isLoading: false,
+      isError: false,
+      isSuccess: false,
+      setData: expect.any(Function),
+      setError: expect.any(Function),
+      error: null,
+      status: 'idle',
+      data: customInitialState,
+      run: expect.any(Function),
+      reset: expect.any(Function)
+    });
+});
 
 test.todo('can set the data')
 // 💰 result.current.setData('whatever you want')
