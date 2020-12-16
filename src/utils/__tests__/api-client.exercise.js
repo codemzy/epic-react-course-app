@@ -121,7 +121,7 @@ test('when data is provided, it is stringified and the method defaults to POST',
 });
 
 // extra 1
-test('when the request fails, an error message is recieved', async() => {
+test('when the request fails, an error message is recieved and promise is rejected', async() => {
     const endpoint = 'test-endpoint';
     const testError = {message: 'Test error'}
     server.use(
@@ -129,10 +129,7 @@ test('when the request fails, an error message is recieved', async() => {
             return res(ctx.status(400), ctx.json(testError));
         })
     );
-    let result = await client(endpoint).catch(function(error) {
-        return error;
-    }); // make the post request
-    expect(result).toEqual(testError);
+    await expect(client(endpoint)).rejects.toEqual(testError); // actually check the promise rejects
 });
 
 // extra 1
@@ -144,7 +141,7 @@ test('logs out when 401 error is recieved', async() => {
         })
     );
     let result = await client(endpoint).catch(function(error) {
-        return error;
+        return error; // this turns error into resolved promise so if need to check rejects use code above
     }); // make the post request
     expect(queryCache.clear).toHaveBeenCalledTimes(1);
     expect(auth.logout).toHaveBeenCalledTimes(1);
