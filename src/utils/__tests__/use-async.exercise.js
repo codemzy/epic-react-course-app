@@ -93,11 +93,13 @@ test('calling run with a promise which rejects', async() => {
     });
     expect(result.current.status).toBe("pending");
     // reject the promise
+    let rejectValue = { error: "failed" };
     await act(async() => {
-        reject({ error: "failed" });
+        reject(rejectValue);
         await runPromise.catch((e) => e); // catch the error and return it
     });
     expect(result.current.status).toBe("rejected"); // check the status is rejected
+    expect(result.current.error).toEqual(rejectValue);
     // reset
     act(() => {
         result.current.reset();
@@ -124,8 +126,16 @@ test('can specify an initial state', function() {
     });
 });
 
-test.todo('can set the data')
-// 💰 result.current.setData('whatever you want')
+test('can set the data', async() => {
+    // 💰 result.current.setData('whatever you want')
+    let customData = "Just testing";
+    const { result } = renderHook(() => useAsync());
+    act(() => {
+        result.current.setData(customData);
+    });
+    expect(result.current.status).toBe("resolved");
+    expect(result.current.data).toBe(customData);
+});
 
 test.todo('can set the error')
 // 💰 result.current.setError('whatever you want')
