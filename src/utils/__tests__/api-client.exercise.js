@@ -18,20 +18,21 @@ const apiURL = process.env.REACT_APP_API_URL;
 // 🐨 afterEach test, reset the server handlers to their original handlers
 // via `server.resetHandlers()`
 
-// start the server before tests start
-beforeAll(() => {
-  return server.listen();
-});
+// moved to setupTests in extra 2
+// // start the server before tests start
+// beforeAll(() => {
+//   return server.listen();
+// });
 
-// close the server when tests have finished
-afterAll(() => {
-  return server.close();
-});
+// // close the server when tests have finished
+// afterAll(() => {
+//   return server.close();
+// });
 
-// after each test reset the handlers
-afterEach(() => {
-  return server.resetHandlers();
-});
+// // after each test reset the handlers
+// afterEach(() => {
+//   return server.resetHandlers();
+// });
 
 // 🐨 flesh these out:
 
