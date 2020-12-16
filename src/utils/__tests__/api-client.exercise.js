@@ -146,7 +146,7 @@ test('logs out when 401 error is recieved', async() => {
     let result = await client(endpoint).catch(function(error) {
         return error;
     }); // make the post request
-    expect(queryCache.clear).toHaveBeenCalled();
-    expect(auth.logout).toHaveBeenCalled();
+    expect(queryCache.clear).toHaveBeenCalledTimes(1);
+    expect(auth.logout).toHaveBeenCalledTimes(1);
     expect(result.message).toEqual("Please re-authenticate.");
 });
