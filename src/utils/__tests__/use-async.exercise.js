@@ -14,6 +14,14 @@ function deferred() {
   return {promise, resolve, reject}
 }
 
+beforeEach(() => {
+    jest.spyOn(console, 'error');
+})
+
+afterEach(() => {
+    console.error.mockRestore();
+})
+
 // Use it like this:
 // const {promise, resolve} = deferred()
 // promise.then(() => console.log('resolved'))
@@ -168,9 +176,9 @@ test('No state updates happen if the component is unmounted while pending', asyn
     });
     // check for errors
     // let console = { error: jest.fn() }; // use spy instead
-    const spy = jest.spyOn(console, 'error'); // spy on console error method
+    // const spy = jest.spyOn(console, 'error'); // spy on console error method
     expect(console.error).not.toHaveBeenCalled();
-    spy.mockRestore(); // remove spy
+    // spy.mockRestore(); // remove spy - moved to make sure that even if error in test the spy is removed
 });
 
 test.todo('calling "run" without a promise results in an early error')
