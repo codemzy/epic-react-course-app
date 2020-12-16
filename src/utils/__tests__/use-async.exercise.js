@@ -148,8 +148,29 @@ test('can set the error', async() => {
     expect(result.current.error).toBe(customError);
 });
 
-test.todo('No state updates happen if the component is unmounted while pending')
-// 💰 const {result, unmount} = renderHook(...)
-// 🐨 ensure that console.error is not called (React will call console.error if updates happen when unmounted)
+test('No state updates happen if the component is unmounted while pending', async function() {
+    // 💰 const {result, unmount} = renderHook(...)
+    // 🐨 ensure that console.error is not called (React will call console.error if updates happen when unmounted)
+    const { result, unmount } = renderHook(() => useAsync());
+    const {promise, resolve} = deferred();
+    // run the promise
+    let runPromise;
+    act(() => {
+        runPromise = result.current.run(promise)
+    });
+    expect(result.current.status).toBe("pending");
+    // unmount
+    unmount();
+    // resolve the promise
+    await act(async() => {
+        resolve("success");
+        await runPromise;
+    });
+    // check for errors
+    // let console = { error: jest.fn() }; // use spy instead
+    const spy = jest.spyOn(console, 'error'); // spy on console error method
+    expect(console.error).not.toHaveBeenCalled();
+    spy.mockRestore(); // remove spy
+});
 
 test.todo('calling "run" without a promise results in an early error')
