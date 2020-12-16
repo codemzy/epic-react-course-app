@@ -1,18 +1,18 @@
 // 🐨 instead of React Testing Library, you'll use React Hooks Testing Library
-// import {renderHook, act} from '@testing-library/react-hooks'
+import {renderHook, act} from '@testing-library/react-hooks'
 // 🐨 Here's the thing you'll be testing:
-// import {useAsync} from '../hooks'
+import {useAsync} from '../hooks'
 
 // 💰 I'm going to give this to you. It's a way for you to create a promise
 // which you can imperatively resolve or reject whenever you want.
-// function deferred() {
-//   let resolve, reject
-//   const promise = new Promise((res, rej) => {
-//     resolve = res
-//     reject = rej
-//   })
-//   return {promise, resolve, reject}
-// }
+function deferred() {
+  let resolve, reject
+  const promise = new Promise((res, rej) => {
+    resolve = res
+    reject = rej
+  })
+  return {promise, resolve, reject}
+}
 
 // Use it like this:
 // const {promise, resolve} = deferred()
@@ -23,21 +23,48 @@
 // do stuff/make assertions you want to after the promise has resolved
 
 // 🐨 flesh out these tests
-test.todo('calling run with a promise which resolves')
-// 🐨 get a promise and resolve function from the deferred utility
-// 🐨 use renderHook with useAsync to get the result
-// 🐨 assert the result.current is the correct default state
-
-// 🐨 call `run`, passing the promise
-//    (💰 this updates state so it needs to be done in an `act` callback)
-// 🐨 assert that result.current is the correct pending state
-
-// 🐨 call resolve and wait for the promise to be resolved
-//    (💰 this updates state too and you'll need it to be an async `act` call so you can await the promise)
-// 🐨 assert the resolved state
-
-// 🐨 call `reset` (💰 this will update state, so...)
-// 🐨 assert the result.current has actually been reset
+test('calling run with a promise which resolves', async() => {
+    // 🐨 get a promise and resolve function from the deferred utility
+    // 🐨 use renderHook with useAsync to get the result
+    // 🐨 assert the result.current is the correct default state
+    const {promise, resolve} = deferred();
+    const { result } = renderHook(() => useAsync());
+    expect(result.current).toEqual(    {
+      isIdle: true,
+      isLoading: false,
+      isError: false,
+      isSuccess: false,
+      setData: expect.any(Function),
+      setError: expect.any(Function),
+      error: null,
+      status: 'idle',
+      data: null,
+      run: expect.any(Function),
+      reset: expect.any(Function)
+    });
+    // 🐨 call `run`, passing the promise
+    //    (💰 this updates state so it needs to be done in an `act` callback)
+    // 🐨 assert that result.current is the correct pending state
+    let runPromise;
+    act(() => {
+        runPromise = result.current.run(promise)
+    });
+    expect(result.current.status).toBe("pending");
+    // 🐨 call resolve and wait for the promise to be resolved
+    //    (💰 this updates state too and you'll need it to be an async `act` call so you can await the promise)
+    // 🐨 assert the resolved state
+    await act(async() => {
+        resolve({ resolved: true });
+        await runPromise;
+    });
+    expect(result.current.status).toBe("resolved");
+    // 🐨 call `reset` (💰 this will update state, so...)
+    // 🐨 assert the result.current has actually been reset
+    act(() => {
+        result.current.reset();
+    });
+    expect(result.current.status).toBe("idle");
+});
 
 test.todo('calling run with a promise which rejects')
 // 🐨 this will be very similar to the previous test, except you'll reject the
