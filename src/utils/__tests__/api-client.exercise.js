@@ -102,16 +102,14 @@ test('when data is provided, it is stringified and the method defaults to POST',
 // 🐨 call client with an endpoint and an object with the data
 //    💰 client(endpoint, {data})
 // 🐨 verify the request.body is equal to the mock data object you passed
-    let request;
     const data = { value: 'test', info: 'fake' };
     const endpoint = 'test-endpoint';
     // mock server listen for post requests
     server.use(
         rest.post(`${apiURL}/${endpoint}`, async (req, res, ctx) => {
-            request = req;
-            return res(ctx.json({ success: "success" }));
+            return res(ctx.json(req.body)); // return the req.body
         }),
     );
-    await client(endpoint, { data }); // make the post request
-    expect(request.body).toEqual(data); // check the body contains the data
+    let result = await client(endpoint, { data }); // make the post request
+    expect(result).toEqual(data); // check the body contains the data
 });
