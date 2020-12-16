@@ -4,6 +4,12 @@ import {server, rest} from 'test/server';
 // 🐨 grab the client
 import {client} from '../api-client';
 
+// extra 1 - mock these modules
+import {queryCache} from 'react-query';
+import * as auth from 'auth-provider'
+jest.mock('react-query');
+jest.mock('auth-provider');
+
 // the url
 const apiURL = process.env.REACT_APP_API_URL;
 
@@ -63,7 +69,7 @@ test('adds auth token when a token is in localStorage', async() => {
     //
     const endpoint = 'test-endpoint';
     server.use(
-        rest.get(`${apiURL}/${endpoint}`, async (req, res, ctx) => {
+        rest.get(`${apiURL}/${endpoint}`, async(req, res, ctx) => {
             request = req;
             return res(ctx.json({ success: "success" }));
         }),
@@ -95,7 +101,7 @@ test('allows for config overrides', async() => {
     expect(request.method).toBe('PUT');
 });
 
-test('when data is provided, it is stringified and the method defaults to POST', async () => {
+test('when data is provided, it is stringified and the method defaults to POST', async() => {
 // 🐨 create a mock data object
 // 🐨 create a server handler very similar to the previous ones to handle the post request
 //    💰 Use rest.post instead of rest.get like we've been doing so far
@@ -112,4 +118,35 @@ test('when data is provided, it is stringified and the method defaults to POST',
     );
     let result = await client(endpoint, { data }); // make the post request
     expect(result).toEqual(data); // check the body contains the data
+});
+
+// extra 1
+test('when the request fails, an error message is recieved', async() => {
+    const endpoint = 'test-endpoint';
+    const testError = {message: 'Test error'}
+    server.use(
+        rest.get(`${apiURL}/${endpoint}`, async (req, res, ctx) => {
+            return res(ctx.status(400), ctx.json(testError));
+        })
+    );
+    let result = await client(endpoint).catch(function(error) {
+        return error;
+    }); // make the post request
+    expect(result).toEqual(testError);
+});
+
+// extra 1
+test('logs out when 401 error is recieved', async() => {
+    const endpoint = 'test-endpoint';
+    server.use(
+        rest.get(`${apiURL}/${endpoint}`, async (req, res, ctx) => {
+            return res(ctx.status(401));
+        })
+    );
+    let result = await client(endpoint).catch(function(error) {
+        return error;
+    }); // make the post request
+    expect(queryCache.clear).toHaveBeenCalled();
+    expect(auth.logout).toHaveBeenCalled();
+    expect(result.message).toEqual("Please re-authenticate.");
 });
