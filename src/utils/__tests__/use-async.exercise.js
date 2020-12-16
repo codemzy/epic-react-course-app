@@ -29,7 +29,7 @@ test('calling run with a promise which resolves', async() => {
     // 🐨 assert the result.current is the correct default state
     const {promise, resolve} = deferred();
     const { result } = renderHook(() => useAsync());
-    expect(result.current).toEqual(    {
+    expect(result.current).toEqual({
       isIdle: true,
       isLoading: false,
       isError: false,
@@ -66,11 +66,44 @@ test('calling run with a promise which resolves', async() => {
     expect(result.current.status).toBe("idle");
 });
 
-test.todo('calling run with a promise which rejects')
-// 🐨 this will be very similar to the previous test, except you'll reject the
-// promise instead and assert on the error state.
-// 💰 to avoid the promise actually failing your test, you can catch
-//    the promise returned from `run` with `.catch(() => {})`
+test('calling run with a promise which rejects', async() => {
+    // 🐨 this will be very similar to the previous test, except you'll reject the
+    // promise instead and assert on the error state.
+    // 💰 to avoid the promise actually failing your test, you can catch
+    //    the promise returned from `run` with `.catch(() => {})`
+    const {promise, reject} = deferred();
+    const { result } = renderHook(() => useAsync());
+    expect(result.current).toEqual({
+      isIdle: true,
+      isLoading: false,
+      isError: false,
+      isSuccess: false,
+      setData: expect.any(Function),
+      setError: expect.any(Function),
+      error: null,
+      status: 'idle',
+      data: null,
+      run: expect.any(Function),
+      reset: expect.any(Function)
+    });
+    // call run
+    let runPromise;
+    act(() => {
+        runPromise = result.current.run(promise)
+    });
+    expect(result.current.status).toBe("pending");
+    // reject the promise
+    await act(async() => {
+        reject({ error: "failed" });
+        await runPromise.catch((e) => e); // catch the error and return it
+    });
+    expect(result.current.status).toBe("rejected"); // check the status is rejected
+    // reset
+    act(() => {
+        result.current.reset();
+    });
+    expect(result.current.status).toBe("idle");
+});
 
 test.todo('can specify an initial state')
 // 💰 useAsync(customInitialState)
