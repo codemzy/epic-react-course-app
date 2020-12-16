@@ -137,8 +137,16 @@ test('can set the data', async() => {
     expect(result.current.data).toBe(customData);
 });
 
-test.todo('can set the error')
-// 💰 result.current.setError('whatever you want')
+test('can set the error', async() => {
+    // 💰 result.current.setError('whatever you want')
+    let customError = "Just testing an error";
+    const { result } = renderHook(() => useAsync());
+    act(() => {
+        result.current.setError(customError);
+    });
+    expect(result.current.status).toBe("rejected");
+    expect(result.current.error).toBe(customError);
+});
 
 test.todo('No state updates happen if the component is unmounted while pending')
 // 💰 const {result, unmount} = renderHook(...)
