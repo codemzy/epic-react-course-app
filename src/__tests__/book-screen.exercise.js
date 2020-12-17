@@ -19,16 +19,16 @@ window.fetch = async (url, config) => {
 };
 
 test('renders all the book information', async() => {
-    // // 🐨 "authenticate" the client by setting the auth.localStorageKey in localStorage to some string value (can be anything for now)
-    // window.localStorage.setItem(auth.localStorageKey, 'SOME_FAKE_TOKEN');
-    // // 🐨 create a user using `buildUser`
-    // const user = buildUser();
-    // // 🐨 create a book use `buildBook`
-    // const book = buildBook();
-    // // 🐨 update the URL to `/book/${book.id}`
-    // //   💰 window.history.pushState({}, 'page title', route)
-    // //   📜 https://developer.mozilla.org/en-US/docs/Web/API/History/pushState
-    // window.history.pushState({}, 'Test page', `/book/${book.id}`);
+    // 🐨 "authenticate" the client by setting the auth.localStorageKey in localStorage to some string value (can be anything for now)
+    window.localStorage.setItem(auth.localStorageKey, 'SOME_FAKE_TOKEN');
+    // 🐨 create a user using `buildUser`
+    const user = buildUser();
+    // 🐨 create a book use `buildBook`
+    const book = buildBook();
+    // 🐨 update the URL to `/book/${book.id}`
+    //   💰 window.history.pushState({}, 'page title', route)
+    //   📜 https://developer.mozilla.org/en-US/docs/Web/API/History/pushState
+    window.history.pushState({}, 'Test page', `/book/${book.id}`);
 
     // 🐨 reassign window.fetch to another function and handle the following requests:
     // - url ends with `/me`: respond with {user}
@@ -38,8 +38,8 @@ test('renders all the book information', async() => {
     // 💰 return Promise.resolve({ok: true, json: async () => ({ /* response data here */ })})
     let originalFetch = window.fetch;
     window.fetch = async function(url, config) {
-        if (url.endsWith('/me')) {
-            return Promise.resolve({ok: true, json: async () => ({ user })});
+        if (url.endsWith('/bootstrap')) { // from video
+            return Promise.resolve({ok: true, json: async () => ({ user, listItems: [] })});
         } else if (url.endsWith(`/list-items`)) {
             return Promise.resolve({ok: true, json: async () => ({ listItems: []})});
         } else if (url.endsWith(`/books/${book.id}`)) {
@@ -59,4 +59,15 @@ test('renders all the book information', async() => {
     await waitForElementToBeRemoved(() => screen.getByLabelText('loading'));
     screen.debug();
     // 🐨 assert the book's info is in the document
+    console.log(book);
+    // check book contents is there
+    expect(screen.getByRole('heading', {name: book.title})).toBeInTheDocument();
+    expect(screen.getByText(book.author)).toBeInTheDocument();
+    expect(screen.getByText(book.publisher)).toBeInTheDocument();
+    expect(screen.getByText(book.synopsis)).toBeInTheDocument();
+    // check button are there
+    expect(screen.getByRole('button', {name: /add to list/i})).toBeInTheDocument();
+    expect(screen.queryByRole('button', {name: /remove from list/i})).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', {name: /mark as read/i})).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', {name: /mark as unread/i})).not.toBeInTheDocument();
 });
