@@ -105,7 +105,7 @@ test('can remove a list item for the book', async () => {
 test('can mark a list item as read', async () => {
     const user = await loginAsUser()
     const book = await booksDB.create(buildBook())
-    let listItem = await listItemsDB.create(buildListItem({owner: user, book}));
+    let listItem = await listItemsDB.create(buildListItem({owner: user, book, finishDate: null}));
     const route = `/book/${book.id}`
     await render(<App />, {route, user})
     
