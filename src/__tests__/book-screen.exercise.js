@@ -13,6 +13,7 @@ afterEach(async() => {
     await auth.logout();
 });
 
+// for checking any fect requests that need to be mocked
 window.fetch = async (url, config) => {
   console.warn(url, config)
   return Promise.reject(new Error(`NEED TO HANDLE: ${url}`))
@@ -37,6 +38,7 @@ test('renders all the book information', async() => {
     // 💰 window.fetch = async (url, config) => { /* handle stuff here*/ }
     // 💰 return Promise.resolve({ok: true, json: async () => ({ /* response data here */ })})
     let originalFetch = window.fetch;
+    // mocking fetch requests
     window.fetch = async function(url, config) {
         if (url.endsWith('/bootstrap')) { // from video
             return Promise.resolve({ok: true, json: async () => ({ user, listItems: [] })});
@@ -57,14 +59,15 @@ test('renders all the book information', async() => {
     // 📜 https://testing-library.com/docs/dom-testing-library/api-async#waitfor
     // 💰 if (queryCache.isFetching or there are loading indicators) then throw an error...
     await waitForElementToBeRemoved(() => screen.getByLabelText('loading'));
-    screen.debug();
+    // screen.debug();
     // 🐨 assert the book's info is in the document
-    console.log(book);
+    // console.log(book);
     // check book contents is there
     expect(screen.getByRole('heading', {name: book.title})).toBeInTheDocument();
     expect(screen.getByText(book.author)).toBeInTheDocument();
     expect(screen.getByText(book.publisher)).toBeInTheDocument();
     expect(screen.getByText(book.synopsis)).toBeInTheDocument();
+    expect(screen.getByRole('img', {name: /book cover/i})).toHaveAttribute('src', book.coverImageUrl);
     // check button are there
     expect(screen.getByRole('button', {name: /add to list/i})).toBeInTheDocument();
     expect(screen.queryByRole('button', {name: /remove from list/i})).not.toBeInTheDocument();
