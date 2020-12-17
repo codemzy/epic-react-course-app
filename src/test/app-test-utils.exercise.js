@@ -4,12 +4,12 @@ import {
   waitForElementToBeRemoved,
 } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import * as auth from 'auth-provider'
-import * as usersDB from 'test/data/users'
-import { buildUser } from 'test/generate'
 import {AppProviders} from 'context'
+import * as auth from 'auth-provider'
+import {buildUser} from './generate'
+import * as usersDB from './data/users'
 
-async function customRender(ui, {route = '/list', user, ...renderOptions} = {}) {
+async function render(ui, {route = '/list', user, ...renderOptions} = {}) {
   // if you want to render the app unauthenticated then pass "null" as the user
   user = typeof user === 'undefined' ? await loginAsUser() : user
   window.history.pushState({}, 'Test page', route)
@@ -38,7 +38,5 @@ const waitForLoadingToFinish = () =>
     ...screen.queryAllByText(/loading/i),
   ])
 
-// re-export everything
 export * from '@testing-library/react'
-
-export {userEvent, customRender, waitForLoadingToFinish};
+export {render, userEvent, loginAsUser, waitForLoadingToFinish}
