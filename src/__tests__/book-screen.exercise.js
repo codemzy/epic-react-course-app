@@ -1,59 +1,21 @@
 import React from 'react'
-import {render, screen, waitForElementToBeRemoved} from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
-import {queryCache} from 'react-query'
-import * as auth from 'auth-provider'
-import {buildUser, buildBook} from 'test/generate'
-import * as usersDB from 'test/data/users'
+import {
+  customRender,
+  userEvent,
+  screen,
+  waitForLoadingToFinish,
+} from 'test/app-test-utils'
+import { buildBook} from 'test/generate'
 import * as booksDB from 'test/data/books'
-import * as listItemsDB from 'test/data/list-items'
 import {formatDate} from 'utils/misc'
-import {AppProviders} from 'context'
 import {App} from 'app'
-
-// general cleanup
-afterEach(async () => {
-  queryCache.clear()
-  await Promise.all([
-    auth.logout(),
-    usersDB.reset(),
-    booksDB.reset(),
-    listItemsDB.reset(),
-  ])
-})
-
-// render function
-const renderApp = function() {
-    return render(<App />, {wrapper: AppProviders});
-};
-
-// log in function
-const logIn = async function() {
-  const user = buildUser()
-  await usersDB.create(user)
-  const authUser = await usersDB.authenticate(user)
-  window.localStorage.setItem(auth.localStorageKey, authUser.token)
-};
-
-// loading function
-const waitForLoadingToFinish = async function() {
-  await waitForElementToBeRemoved(() => [
-    ...screen.queryAllByLabelText(/loading/i),
-    ...screen.queryAllByText(/loading/i),
-  ])
-};
 
 
 test('renders all the book information', async () => {
-  await logIn();
-
   const book = await booksDB.create(buildBook())
   const route = `/book/${book.id}`
-  window.history.pushState({}, 'Test page', route)
 
-  renderApp();
-
-  await waitForLoadingToFinish();
+  await customRender(<App />, {route})
 
   expect(screen.getByRole('heading', {name: book.title})).toBeInTheDocument()
   expect(screen.getByText(book.author)).toBeInTheDocument()
@@ -82,21 +44,16 @@ test('renders all the book information', async () => {
 })
 
 test('can create a list item for the book', async () => {
-  await logIn();
-
   const book = await booksDB.create(buildBook())
   const route = `/book/${book.id}`
-  window.history.pushState({}, 'Test page', route)
 
-  renderApp();
-
-  await waitForLoadingToFinish();
+  await customRender(<App />, {route})
 
   const addToListButton = screen.getByRole('button', {name: /add to list/i})
   userEvent.click(addToListButton)
   expect(addToListButton).toBeDisabled()
 
-  await waitForLoadingToFinish();
+  await waitForLoadingToFinish()
 
   expect(
     screen.getByRole('button', {name: /mark as read/i}),
