@@ -123,3 +123,32 @@ test('can mark a list item as read', async () => {
         `${formatDate(listItem.startDate)} — ${formatDate(Date.now())}`,
     )
 });
+
+// extra 5
+test('can edit a note', async () => {
+    // takes any timers and fakes them
+    jest.useFakeTimers() // using fake timers to skip debounce time
+    const user = await loginAsUser()
+    const book = await booksDB.create(buildBook())
+    const listItem = await listItemsDB.create(buildListItem({owner: user, book}));
+    const route = `/book/${book.id}`
+    await render(<App />, {route, user})
+
+    const notesInput = screen.getByRole('textbox', {name: /notes/i});
+    let newNote = "Hello, I am a note!";
+
+    userEvent.clear(notesInput)
+    userEvent.type(notesInput, newNote)
+
+    // wait for the loading spinner to show up
+    await screen.findByLabelText(/loading/i)
+    // wait for the loading spinner to go away
+    await waitForLoadingToFinish()
+
+    // screen.debug();
+    expect(notesInput).toHaveValue(newNote); // check new value in textarea
+    // check is in DB
+    expect(await listItemsDB.read(listItem.id)).toMatchObject({
+        notes: newNote,
+    })
+});
