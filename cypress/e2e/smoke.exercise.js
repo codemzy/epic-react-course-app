@@ -54,13 +54,20 @@ describe('smoke', () => {
     // and *then* wait for it to go away.
     // 🐨 wait for the loading spinner to show up (💰 .should('exist'))
     // 🐨 wait for the loading spinner to go away (💰 .should('not.exist'))
-    //
-    // 🐨 mark the book as read
-    //
-    // the radio buttons are fancy and the inputs themselves are visually hidden
-    // in favor of nice looking stars, so we have to the force option to click.
-    // 📜 https://docs.cypress.io/api/commands/click.html#Arguments
-    // 🐨 click the 5 star rating radio button
+    cy.findByRole('main').within(() => {
+        cy.findByRole('textbox', { name: /notes/i }).type('This is a book is goooooood');
+        cy.findByLabelText(/loading/i).should('exist'); // should appear
+        cy.findByLabelText(/loading/i).should('not.exist'); // then go
+
+        // 🐨 mark the book as read
+        cy.findByRole('button', { name: /mark as read/i }).click();
+
+        // the radio buttons are fancy and the inputs themselves are visually hidden
+        // in favor of nice looking stars, so we have to the force option to click.
+        // 📜 https://docs.cypress.io/api/commands/click.html#Arguments
+        // 🐨 click the 5 star rating radio button
+        cy.findByRole('radio', { name: /5 stars/i }).click({ force: true});
+    });
     //
     // 🐨 navigate to the finished books page
     //
