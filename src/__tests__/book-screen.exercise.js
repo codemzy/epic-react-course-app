@@ -13,14 +13,6 @@ import * as listItemsDB from 'test/data/list-items'
 import {formatDate} from 'utils/misc'
 import {App} from 'app'
 
-beforeAll(() => {
-  jest.spyOn(console, 'error').mockImplementation(() => {})
-})
-
-afterAll(() => {
-  console.error.mockRestore()
-})
-
 async function renderBookScreen({user, book, listItem} = {}) {
   if (user === undefined) {
     user = await loginAsUser()
@@ -169,15 +161,28 @@ test('can edit a note', async () => {
   })
 })
 
-// extra 7
-test('shows an error message when the book fails to load', async () => {
-  await renderBookScreen({book: {id: 1234321}, listItem: null})
-  // screen.debug()
-  expect(console.error).toHaveBeenCalled()
-  expect((await screen.findByRole('alert')).textContent).toMatchInlineSnapshot(
-    `"There was an error: Book not found"`,
-  )
-})
+// so we only mock console on these tests
+describe('console errors', () => {
 
-// extra 7
-test.todo('note update failures are displayed')
+    beforeAll(() => {
+        jest.spyOn(console, 'error').mockImplementation(() => {})
+    })
+
+    afterAll(() => {
+        console.error.mockRestore()
+    })
+
+    // extra 7
+    test('shows an error message when the book fails to load', async () => {
+    await renderBookScreen({book: {id: "BAD_ID"}, listItem: null})
+    // screen.debug()
+    expect(console.error).toHaveBeenCalled()
+    expect((await screen.findByRole('alert')).textContent).toMatchInlineSnapshot(
+        `"There was an error: Book not found"`,
+    )
+    })
+
+    // extra 7
+    test.todo('note update failures are displayed')
+
+})
