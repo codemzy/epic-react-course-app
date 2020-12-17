@@ -93,19 +93,33 @@ test('can remove a list item for the book', async () => {
 
     expect(screen.getByRole('button', {name: /add to list/i})).toBeInTheDocument()
 
-    expect(
-        screen.queryByRole('button', {name: /remove from list/i}),
-    ).not.toBeInTheDocument()
-    expect(
-        screen.queryByRole('button', {name: /mark as read/i}),
-    ).not.toBeInTheDocument()
-    expect(
-        screen.queryByRole('button', {name: /mark as unread/i}),
-    ).not.toBeInTheDocument()
-    expect(
-        screen.queryByRole('textbox', {name: /notes/i}),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', {name: /remove from list/i})).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', {name: /mark as read/i})).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', {name: /mark as unread/i})).not.toBeInTheDocument()
+    expect(screen.queryByRole('textbox', {name: /notes/i})).not.toBeInTheDocument()
     expect(screen.queryByRole('radio', {name: /star/i})).not.toBeInTheDocument()
     expect(screen.queryByLabelText(/start date/i)).not.toBeInTheDocument()
+});
 
-})
+// extra 5
+test('can mark a list item as read', async () => {
+    const user = await loginAsUser()
+    const book = await booksDB.create(buildBook())
+    let listItem = await listItemsDB.create(buildListItem({owner: user, book}));
+    const route = `/book/${book.id}`
+    await render(<App />, {route, user})
+    
+    const markAsReadButton = screen.getByRole('button', {name: /mark as read/i})
+    userEvent.click(markAsReadButton)
+    expect(markAsReadButton).toBeDisabled()
+    await waitForLoadingToFinish()
+
+    expect(screen.queryByRole('button', {name: /mark as read/i})).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', {name: /mark as unread/i})).toBeInTheDocument()
+    expect(screen.queryAllByRole('radio', {name: /star/i})).toHaveLength(5)
+    expect(screen.queryByRole('button', {name: /remove from list/i})).toBeInTheDocument()
+    const startAndFinishDateNode = screen.getByLabelText(/start and finish date/i)
+    expect(startAndFinishDateNode).toHaveTextContent(
+        `${formatDate(listItem.startDate)} — ${formatDate(Date.now())}`,
+    )
+});
