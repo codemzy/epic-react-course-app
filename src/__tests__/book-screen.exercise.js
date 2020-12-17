@@ -7,9 +7,9 @@ import {buildUser, buildBook} from 'test/generate'
 import * as usersDB from 'test/data/users'
 import * as booksDB from 'test/data/books'
 import * as listItemsDB from 'test/data/list-items'
+import {formatDate} from 'utils/misc'
 import {AppProviders} from 'context'
 import {App} from 'app'
-import {formatDate} from 'utils/misc';
 
 // general cleanup
 afterEach(async () => {
@@ -22,22 +22,38 @@ afterEach(async () => {
   ])
 })
 
-test('renders all the book information', async () => {
+// render function
+const renderApp = function() {
+    return render(<App />, {wrapper: AppProviders});
+};
+
+// log in function
+const logIn = async function() {
   const user = buildUser()
   await usersDB.create(user)
   const authUser = await usersDB.authenticate(user)
   window.localStorage.setItem(auth.localStorageKey, authUser.token)
+};
+
+// loading function
+const waitForLoadingToFinish = async function() {
+  await waitForElementToBeRemoved(() => [
+    ...screen.queryAllByLabelText(/loading/i),
+    ...screen.queryAllByText(/loading/i),
+  ])
+};
+
+
+test('renders all the book information', async () => {
+  await logIn();
 
   const book = await booksDB.create(buildBook())
   const route = `/book/${book.id}`
   window.history.pushState({}, 'Test page', route)
 
-  render(<App />, {wrapper: AppProviders})
+  renderApp();
 
-  await waitForElementToBeRemoved(() => [
-    ...screen.queryAllByLabelText(/loading/i),
-    ...screen.queryAllByText(/loading/i),
-  ])
+  await waitForLoadingToFinish();
 
   expect(screen.getByRole('heading', {name: book.title})).toBeInTheDocument()
   expect(screen.getByText(book.author)).toBeInTheDocument()
@@ -65,42 +81,39 @@ test('renders all the book information', async () => {
   expect(screen.queryByLabelText(/start date/i)).not.toBeInTheDocument()
 })
 
-// extra 2
 test('can create a list item for the book', async () => {
-  const user = buildUser()
-  await usersDB.create(user)
-  const authUser = await usersDB.authenticate(user)
-  window.localStorage.setItem(auth.localStorageKey, authUser.token)
+  await logIn();
 
   const book = await booksDB.create(buildBook())
   const route = `/book/${book.id}`
   window.history.pushState({}, 'Test page', route)
 
-  render(<App />, {wrapper: AppProviders})
+  renderApp();
 
-  await waitForElementToBeRemoved(() => [
-    ...screen.queryAllByLabelText(/loading/i),
-    ...screen.queryAllByText(/loading/i),
-  ])
-  
-  const addToListButton = screen.getByRole('button', {name: /add to list/i});
-  expect(addToListButton).toBeInTheDocument();
-  userEvent.click(addToListButton);
-  expect(addToListButton).toBeDisabled();
+  await waitForLoadingToFinish();
 
-  await waitForElementToBeRemoved(() => [
-    ...screen.queryAllByLabelText(/loading/i),
-    ...screen.queryAllByText(/loading/i),
-  ])
-  // screen.debug();
-  expect(screen.queryByRole('button', {name: /add to list/i})).not.toBeInTheDocument()
-  expect(screen.queryByRole('button', {name: /remove from list/i})).toBeInTheDocument()
-  expect(screen.queryByRole('button', {name: /mark as read/i})).toBeInTheDocument()
-  expect(screen.queryByRole('button', {name: /mark as unread/i})).not.toBeInTheDocument()
-  expect(screen.queryByRole('textbox', {name: /notes/i})).toBeInTheDocument()
+  const addToListButton = screen.getByRole('button', {name: /add to list/i})
+  userEvent.click(addToListButton)
+  expect(addToListButton).toBeDisabled()
+
+  await waitForLoadingToFinish();
+
+  expect(
+    screen.getByRole('button', {name: /mark as read/i}),
+  ).toBeInTheDocument()
+  expect(
+    screen.getByRole('button', {name: /remove from list/i}),
+  ).toBeInTheDocument()
+  expect(screen.getByRole('textbox', {name: /notes/i})).toBeInTheDocument()
+
+  const startDateNode = screen.getByLabelText(/start date/i)
+  expect(startDateNode).toHaveTextContent(formatDate(Date.now()))
+
+  expect(
+    screen.queryByRole('button', {name: /add to list/i}),
+  ).not.toBeInTheDocument()
+  expect(
+    screen.queryByRole('button', {name: /mark as unread/i}),
+  ).not.toBeInTheDocument()
   expect(screen.queryByRole('radio', {name: /star/i})).not.toBeInTheDocument()
-  expect(screen.queryByLabelText(/start date/i)).toBeInTheDocument()
-  // check the date is in
-  expect(screen.getByLabelText(/start date/i)).toHaveTextContent(formatDate(new Date()));
-
-});
+})
