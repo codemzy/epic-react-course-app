@@ -13,27 +13,38 @@ import * as listItemsDB from 'test/data/list-items'
 import {formatDate} from 'utils/misc'
 import {App} from 'app'
 
+beforeAll(() => {
+  jest.spyOn(console, 'error').mockImplementation(() => {})
+})
+
+afterAll(() => {
+  console.error.mockRestore()
+})
+
 async function renderBookScreen({user, book, listItem} = {}) {
-  if (book === undefined) {
-      book = await booksDB.create(buildBook())
-  }
   if (user === undefined) {
-      user = await loginAsUser();
+    user = await loginAsUser()
+  }
+  if (book === undefined) {
+    book = await booksDB.create(buildBook())
   }
   if (listItem === undefined) {
-      listItem = await await listItemsDB.create(buildListItem({owner: user, book}));
+    listItem = await listItemsDB.create(buildListItem({owner: user, book}))
   }
   const route = `/book/${book.id}`
+
   const utils = await render(<App />, {user, route})
-  return {...utils, user, book, listItem};
+
+  return {
+    ...utils,
+    book,
+    user,
+    listItem,
+  }
 }
 
 test('renders all the book information', async () => {
   const {book} = await renderBookScreen({listItem: null})
-//   const book = await booksDB.create(buildBook())
-//   const route = `/book/${book.id}`
-
-//   await render(<App />, {route})
 
   expect(screen.getByRole('heading', {name: book.title})).toBeInTheDocument()
   expect(screen.getByText(book.author)).toBeInTheDocument()
@@ -62,11 +73,7 @@ test('renders all the book information', async () => {
 })
 
 test('can create a list item for the book', async () => {
-//   const book = await booksDB.create(buildBook())
-//   const route = `/book/${book.id}`
-
-//   await render(<App />, {route})
-  await renderBookScreen({listItem: null});
+  await renderBookScreen({listItem: null})
 
   const addToListButton = screen.getByRole('button', {name: /add to list/i})
   userEvent.click(addToListButton)
@@ -95,14 +102,7 @@ test('can create a list item for the book', async () => {
 })
 
 test('can remove a list item for the book', async () => {
-//   const user = await loginAsUser()
-//   const book = await booksDB.create(buildBook())
-//   await listItemsDB.create(buildListItem({owner: user, book}))
-//   const route = `/book/${book.id}`
-
-//   await render(<App />, {route, user})
-
-  await renderBookScreen();
+  await renderBookScreen()
 
   const removeFromListButton = screen.getByRole('button', {
     name: /remove from list/i,
@@ -120,22 +120,10 @@ test('can remove a list item for the book', async () => {
 })
 
 test('can mark a list item as read', async () => {
-//   const user = await loginAsUser()
-//   const book = await booksDB.create(buildBook())
-//   const listItem = await listItemsDB.create(
-//     buildListItem({
-//       owner: user,
-//       book,
-//       finishDate: null,
-//     }),
-//   )
-//   const route = `/book/${book.id}`
+  const {listItem} = await renderBookScreen()
 
-//   await render(<App />, {route, user})
-
-  const {listItem} = await renderBookScreen();
   // set the listItem to be unread in the DB
-  await listItemsDB.update(listItem.id, {finishDate: null});
+  await listItemsDB.update(listItem.id, {finishDate: null})
 
   const markAsReadButton = screen.getByRole('button', {name: /mark as read/i})
   userEvent.click(markAsReadButton)
@@ -161,13 +149,7 @@ test('can mark a list item as read', async () => {
 test('can edit a note', async () => {
   // using fake timers to skip debounce time
   jest.useFakeTimers()
-//   const user = await loginAsUser()
-//   const book = await booksDB.create(buildBook())
-//   const listItem = await listItemsDB.create(buildListItem({owner: user, book}))
-//   const route = `/book/${book.id}`
-
-//   await render(<App />, {route, user})
-  const {listItem} = await renderBookScreen();
+  const {listItem} = await renderBookScreen()
 
   const newNotes = faker.lorem.words()
   const notesTextarea = screen.getByRole('textbox', {name: /notes/i})
@@ -186,3 +168,16 @@ test('can edit a note', async () => {
     notes: newNotes,
   })
 })
+
+// extra 7
+test('shows an error message when the book fails to load', async () => {
+  await renderBookScreen({book: {id: 1234321}, listItem: null})
+  // screen.debug()
+  expect(console.error).toHaveBeenCalled()
+  expect((await screen.findByRole('alert')).textContent).toMatchInlineSnapshot(
+    `"There was an error: Book not found"`,
+  )
+})
+
+// extra 7
+test.todo('note update failures are displayed')
