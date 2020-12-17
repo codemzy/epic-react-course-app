@@ -73,4 +73,7 @@ test('renders all the book information', async() => {
     expect(screen.queryByRole('button', {name: /remove from list/i})).not.toBeInTheDocument();
     expect(screen.queryByRole('button', {name: /mark as read/i})).not.toBeInTheDocument();
     expect(screen.queryByRole('button', {name: /mark as unread/i})).not.toBeInTheDocument();
+    expect(screen.queryByRole('textarea', {name: /notes/i})).not.toBeInTheDocument();
+    expect(screen.queryByRole('radio', {name: /star/i})).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/start date/i)).not.toBeInTheDocument();
 });
